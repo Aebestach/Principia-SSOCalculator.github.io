@@ -32,3 +32,10 @@ function calculate() {
   // Display result
   document.getElementById('resultContent').innerText = JSON.stringify(result);
 }
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelector('.btn-primary').addEventListener('click', function() {
+    calculate();
+  });
+});
