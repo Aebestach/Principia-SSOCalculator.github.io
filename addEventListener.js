@@ -53,11 +53,17 @@ let RSSBodies = [
   {"name": "Deimos", "Radius": 6200.0, "GravitationalParameter": 96155.69648120314, "SiderealOrbitalPeriod": 109723, "J2": 0}
 ];
 
+var Rplanet='';
+var Ralt=0;
+var Cos20=0;
+var system='';
 //clear Fields
 function clearFields() {
   document.getElementById('altitude').value = '';
   document.getElementById('eccentricity').value = '';
   document.getElementById('j2').value = '';
+  document.getElementById('altitude_unit').value = 'm';
+  document.getElementById('resultContent').innerHTML = '';
 }
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('.btn-danger').addEventListener('click', function() {
@@ -74,32 +80,32 @@ function readBodies(system){
     return RSSBodies.map(body => body.name);
 }
 document.addEventListener('DOMContentLoaded', function() {
-    const systemSelect = document.getElementById('system');
-    const planetSelect = document.getElementById('planet');
-  
-    const planetOptions = {
-        Stock:readBodies('Stock'),
-        RealSolarSystem:readBodies('RSS')
-      };
-  
-    function updatePlanetOptions() {
-      document.getElementById('j2').value = '';
-      const selectedSystem = systemSelect.value;
-      const options = planetOptions[selectedSystem];
-  
-      planetSelect.innerHTML = '';
+  const systemSelect = document.getElementById('system');
+  const planetSelect = document.getElementById('planet');
 
-      options.forEach(planet => {
-        const option = document.createElement('option');
-        option.value = planet;
-        option.textContent = planet;
-        planetSelect.appendChild(option);
-      });
-    }
+  const planetOptions = {
+    Stock:readBodies('Stock'),
+    RealSolarSystem:readBodies('RSS')
+  };
   
-    updatePlanetOptions();
-    systemSelect.addEventListener('change', updatePlanetOptions);
-  });
+  function updatePlanetOptions() {
+    document.getElementById('j2').value = '';
+    const selectedSystem = systemSelect.value;
+    const options = planetOptions[selectedSystem];
+    
+    planetSelect.innerHTML = '';
+    
+    options.forEach(planet => {
+      const option = document.createElement('option');
+      option.value = planet;
+      option.textContent = planet;
+      planetSelect.appendChild(option);
+    });
+  }
+  
+  updatePlanetOptions();
+  systemSelect.addEventListener('change', updatePlanetOptions);
+});
 
 
 //calculate result
@@ -113,6 +119,23 @@ function calculate() {
   var alt = parseFloat(document.getElementById('altitude').value);
   var ecc = parseFloat(document.getElementById('eccentricity').value);
   var j2 = parseFloat(document.getElementById('j2').value);
+  var unit = document.getElementById('altitude_unit').value;
+
+  if (unit=='km')
+    alt = alt * 1000;
+  Rplanet=planet;
+  system=galaxy;
+
+  // input validation
+  if (galaxy!='RealSolarSystem' &&(isNaN(alt) || isNaN(ecc) || isNaN(j2))) {
+    alert('Input error, please re-enter');
+    return;
+  }else if(isNaN(alt) || isNaN(ecc))
+  {
+    alert('Input error, please re-enter');
+    return;
+  }
+
   switch(galaxy)
   {
     case 'Stock':
@@ -131,9 +154,10 @@ function calculate() {
         var J2 = getBodyPropertyValue(RSSBodies,planet,'J2');
       }break;
   }
-
+  Cos20=C20;
   var ρ = 2 * Math.PI / T_year;
   var SMA = alt + R_E;
+  Ralt = R_E;
   var p = SMA * (1 - ecc * ecc);
   var period = 2 * Math.PI * Math.sqrt(SMA * SMA * SMA / μ);
   var ΔΩ = period * ρ;
@@ -144,7 +168,7 @@ function calculate() {
   var result = {
     Planet: planet,
     Altitude: alt + " m",
-    Inclination: degrees.toFixed(4) + "°",
+    Inclination: degrees.toFixed(4) + " °",
     SMA: SMA.toFixed(2) + " m",
     Eccentricity: ecc.toFixed(2),
     C20: (galaxy === 'Stock' ? ("C(2,0)(cos):\t" + C20.toExponential(17)) : "")
@@ -158,6 +182,8 @@ function calculate() {
                     `${result.C20}`;
 
   document.getElementById('resultContent').innerText = outputText;
+  var button = document.querySelector('.btn-secondary');
+  button.disabled = false;
 }
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('.btn-primary').addEventListener('click', function() {
@@ -165,18 +191,57 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-//lock J2 input
+//lock J2-Input AND Generate-Button 
 document.addEventListener('DOMContentLoaded', function() {
   const systemSelect = document.getElementById('system');
   const j2Input = document.getElementById('j2');
-
+  const generateButton = document.querySelector('.btn.btn-secondary.ml-2');
   systemSelect.addEventListener('change', function() {
     if (systemSelect.value === 'RealSolarSystem') {
       j2Input.disabled = true;
+      generateButton.disabled = true;
     } else {
       j2Input.disabled = false;
+      generateButton.disabled = false;
     }
   });
 
   systemSelect.dispatchEvent(new Event('change'));
+});
+
+
+function generate(){
+  var content = 'principia_gravity_model {\n';
+  content += '  body {\n';
+  content += '    name                    = ' + Rplanet + '\n';
+  content += '    reference_radius        = ' + (Ralt / 1e3) + ' km\n';
+  content += '\n';
+  content += '    geopotential_row {\n';
+  content += '      degree = 2\n';
+  content += '      geopotential_column {\n';
+  content += '        order = 0\n';
+  content += '        cos   = ' + Cos20.toExponential(17) + '\n';
+  content += '        sin   = 0.00000000000000000e+00\n';
+  content += '      }\n';
+  content += '    }\n';
+  content += '  }\n';
+  content += '}\n';
+
+  // Assuming you want to download the file rather than writing to a physical file
+  var filename = system+'_'+Rplanet+'_GravityModels.cfg';
+  var blob = new Blob([content], { type: 'text/plain' });
+  var link = document.createElement('a');
+  link.download = filename;
+  link.href = window.URL.createObjectURL(blob);
+  link.click();
+
+  var button = document.querySelector('.btn-secondary');
+  button.disabled = true;
+}
+document.addEventListener('DOMContentLoaded', function() {
+  var button = document.querySelector('.btn-secondary');
+  button.disabled = true;
+  document.querySelector('.btn-secondary').addEventListener('click', function() {
+    generate();
+  });
 });
