@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Form Example</title>
+  <title>Sun Synchronous Orbit Calculator</title>
   <!-- Link Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
   <div class="container mt-5">
+    <h1 class="text-center">Sun Synchronous Orbit Calculator</h1><br>
     <form>
       <div class="form-group row">
         <label for="system" class="col-sm-2 col-form-label">System</label>
@@ -30,6 +31,7 @@
           </select>
         </div>
       </div>
+      <br><br><br>
       <div class="form-group row">
         <label for="altitude" class="col-sm-2 col-form-label">Altitude</label>
         <div class="col-sm-8">
@@ -56,10 +58,15 @@
       </div>
       <div class="form-group row">
         <div class="col-sm-10 offset-sm-2">
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="calculate" class="btn btn-primary">Calculate</button>
         </div>
       </div>
     </form>
+    <!-- Result Display Box -->
+    <h5>Calculation Result</h5>
+    <div class="mt-4 border p-3">
+        <pre id="resultContent"></pre>
+    </div>
   </div>
 
   <!-- Include Bootstrap JS -->
