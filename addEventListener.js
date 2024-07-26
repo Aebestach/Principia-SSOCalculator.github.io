@@ -53,6 +53,34 @@ let RSSBodies = [
   {"name": "Deimos", "Radius": 6200.0, "GravitationalParameter": 96155.69648120314, "SiderealOrbitalPeriod": 109723, "J2": 0}
 ];
 
+let KcalbelohBodies = [
+  {"name": "Onrefni", "Radius": 320000, "GravitationalParameter": 3.1973759e+11, "SiderealOrbitalPeriod": 612930, "J2": 0},
+  {"name": "Rouqea", "Radius": 1331340, "GravitationalParameter": 2.2305877e+13, "SiderealOrbitalPeriod": 1076000, "J2": 0},
+  {"name": "Iomena", "Radius": 400000, "GravitationalParameter": 5.4917240e+11, "SiderealOrbitalPeriod": 1959000, "J2": 0},
+  {"name": "Uleg", "Radius": 510000, "GravitationalParameter": 1.8365110e+12, "SiderealOrbitalPeriod": 4297150, "J2": 0},
+  {"name": "Maelg", "Radius": 25584688, "GravitationalParameter": 7.9268049e+16, "SiderealOrbitalPeriod": 70200360, "J2": 0},
+  {"name": "Mehtna", "Radius": 460000, "GravitationalParameter": 1.0582944e+12, "SiderealOrbitalPeriod": 281355, "J2": 0},
+  {"name": "Meiuqer", "Radius": 50000, "GravitationalParameter": 9.8066500e+08, "SiderealOrbitalPeriod": 373400, "J2": 0},
+  {"name": "Sunorc", "Radius": 176841600, "GravitationalParameter": 8.0756369e+17, "SiderealOrbitalPeriod": 242334800, "J2": 0},
+  {"name": "Sedah", "Radius": 6700000, "GravitationalParameter": 4.1209241e+13, "SiderealOrbitalPeriod": 848000, "J2": 0},
+  {"name": "Suluco", "Radius": 520000, "GravitationalParameter": 2.2539604e+12, "SiderealOrbitalPeriod": 2641600, "J2": 0},
+  {"name": "Tot", "Radius": 3250, "GravitationalParameter": 1.1546158e+06, "SiderealOrbitalPeriod": 60570, "J2": 0},
+  {"name": "Sera", "Radius": 690000, "GravitationalParameter": 5.0424618e+12, "SiderealOrbitalPeriod": 6727000, "J2": 0},
+  {"name": "Dipuc", "Radius": 180000, "GravitationalParameter": 4.7660319e+10, "SiderealOrbitalPeriod": 111400, "J2": 0},
+  {"name": "Simetra", "Radius": 4800000, "GravitationalParameter": 2.3671627e+14, "SiderealOrbitalPeriod": 38531000, "J2": 0},
+  {"name": "Simeht", "Radius": 4000000, "GravitationalParameter": 1.4446046e+14, "SiderealOrbitalPeriod": 301160, "J2": 0},
+  {"name": "Noi", "Radius": 8300, "GravitationalParameter": 1.1546158e+07, "SiderealOrbitalPeriod": 17474100, "J2": 0},
+  {"name": "AralcA", "Radius": 466956000, "GravitationalParameter": 2.2024464e+18, "SiderealOrbitalPeriod": 1344000000, "J2": 0},
+  {"name": "Anneheg", "Radius": 508000, "GravitationalParameter": 1.9233649e+12, "SiderealOrbitalPeriod": 1281000, "J2": 0},
+  {"name": "AralcB", "Radius": 94437600, "GravitationalParameter": 4.3381520e+17, "SiderealOrbitalPeriod": 9740000, "J2": 0},
+  {"name": "Arorua", "Radius": 720000, "GravitationalParameter": 7.0359340e+12, "SiderealOrbitalPeriod": 743050, "J2": 0},
+  {"name": "Ahtpan", "Radius": 380000, "GravitationalParameter": 6.3723612e+11, "SiderealOrbitalPeriod": 41564000, "J2": 0},
+  {"name": "Anehta", "Radius": 8000000, "GravitationalParameter": 6.8520778e+14, "SiderealOrbitalPeriod": 89742000, "J2": 0},
+  {"name": "Efil", "Radius": 450000, "GravitationalParameter": 1.4264336e+12, "SiderealOrbitalPeriod": 53100, "J2": 0},
+  {"name": "Eulb", "Radius": 310000, "GravitationalParameter": 2.2618058e+11, "SiderealOrbitalPeriod": 136000, "J2": 0},
+  {"name": "Elad", "Radius": 520000, "GravitationalParameter": 1.9357543e+12, "SiderealOrbitalPeriod": 410000, "J2": 0}
+];
+
 var Rplanet='';
 var Ralt=0;
 var Cos20=0;
@@ -78,14 +106,17 @@ function readBodies(system){
     return StockBodies.map(body => body.name);
   else if(system=='RSS')
     return RSSBodies.map(body => body.name);
+  else
+    return KcalbelohBodies.map(body => body.name);
 }
 document.addEventListener('DOMContentLoaded', function() {
   const systemSelect = document.getElementById('system');
   const planetSelect = document.getElementById('planet');
 
   const planetOptions = {
-    Stock:readBodies('Stock'),
-    RealSolarSystem:readBodies('RSS')
+    'Stock': readBodies('Stock'),
+    'RealSolarSystem': readBodies('RSS'),
+    'KcalbelohSystem': readBodies('KcalbelohSystem'),
   };
   
   function updatePlanetOptions() {
@@ -153,6 +184,14 @@ function calculate() {
         var T_year = getBodyPropertyValue(RSSBodies,planet,'SiderealOrbitalPeriod');
         var J2 = getBodyPropertyValue(RSSBodies,planet,'J2');
       }break;
+    case 'KcalbelohSystem':
+      {
+        var R_E = getBodyPropertyValue(KcalbelohBodies,planet,'Radius');
+        var μ = getBodyPropertyValue(KcalbelohBodies,planet,'GravitationalParameter');
+        var T_year = getBodyPropertyValue(KcalbelohBodies,planet,'SiderealOrbitalPeriod');
+        var J2 = j2;
+        var C20 = -1 * (J2 * Math.sqrt(5)) / 5;
+      }break;
   }
   Cos20=C20;
   var ρ = 2 * Math.PI / T_year;
@@ -171,7 +210,7 @@ function calculate() {
     Inclination: degrees.toFixed(4) + " °",
     SMA: SMA.toFixed(2) + " m",
     Eccentricity: ecc.toFixed(2),
-    C20: (galaxy === 'Stock' ? ("C(2,0)(cos):\t" + C20.toExponential(17)) : "")
+    C20: (galaxy === 'RealSolarSystem' ? "" : ("C(2,0)(cos):\t" + C20.toExponential(17)))
   };
 
   var outputText = `Planet:\t\t${result.Planet}\n` +
@@ -197,12 +236,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const j2Input = document.getElementById('j2');
   const generateButton = document.querySelector('.btn.btn-secondary.ml-2');
   systemSelect.addEventListener('change', function() {
-    if (systemSelect.value === 'RealSolarSystem') {
+    if (systemSelect.value == 'RealSolarSystem') {
       j2Input.disabled = true;
       generateButton.disabled = true;
-    } else {
+    } else if(systemSelect.value == 'Stock'){
       j2Input.disabled = false;
       generateButton.disabled = false;
+    }else {
+      j2Input.disabled = false;
+      generateButton.disabled = true;
     }
   });
 
